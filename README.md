@@ -19,6 +19,7 @@ The HTML report includes detailed information about the health status of each se
 The report also contains a timestamp indicating when the report was generated.
 
 Notes
+--> There is an HTML file added with this code which can create a CSV file with the name "ServerList". (Use this for generation of server List)
 Ensure that the CSV file "ServerList.csv" is properly formatted with the header "ServerName" and a list of server names in subsequent rows.
 This script assumes that the servers are accessible and that the necessary permissions are in place to gather system information remotely.
 Disclaimer
