@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server List Manager</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background: linear-gradient(89.2deg, rgb(191, 241, 236) 22.3%, rgb(109, 192, 236) 84.1%);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #2980b9;
+            color: #fff;
+        }
+
+        tr:hover {
+            background-color: #2F78A4;
+        }
+
+        input, button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #3498db;
+			color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        div {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        @media only screen and (max-width: 600px) {
+            input, button {
+                width: 100%;
+                box-sizing: border-box;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>Server List Manager</h1>
+
+<table id="serverTable">
+    <tr>
+        <th>Server Name</th>
+        <th>Server Details</th>
+        <th>Action</th>
+    </tr>
+</table>
+
+<div>
+    <label for="serverName">Server Name:</label>
+    <input type="text" id="serverName" placeholder="Enter server name">
+
+    <label for="serverDetails">Server Details:</label>
+    <input type="text" id="serverDetails" placeholder="Enter server details">
+
+    <button onclick="addEntry()">Add</button>
+    <button onclick="editEntry()">Edit</button>
+    <button onclick="deleteEntry()">Delete</button>
+</div>
+
+<button onclick="generateCSV()">Generate CSV</button>
+<button onclick="location.href = 'Home.html'">Home</button>
+
+<script>
+  function runScript() {
+    // Create a new script element
+    var script = document.createElement('script');
+
+    // Set the source of the script to your PowerShell script
+    script.src = 'Test.ps1';
+
+    // Append the script to the document head
+    document.head.appendChild(script);
+  }
+</script>
+<script>
+    function addEntry() {
+        var serverName = document.getElementById("serverName").value;
+        var serverDetails = document.getElementById("serverDetails").value;
+
+        if (serverName && serverDetails) {
+            var table = document.getElementById("serverTable");
+            var row = table.insertRow(-1);
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+
+            cell1.innerHTML = serverName;
+            cell2.innerHTML = serverDetails;
+            cell3.innerHTML = '<button onclick="editRow(this)">Edit</button>' +
+                '<button onclick="deleteRow(this)">Delete</button>';
+        } else {
+            alert("Please enter both server name and server details.");
+        }
+
+        clearInputs();
+    }
+
+    function editEntry() {
+        var table = document.getElementById("serverTable");
+        var selectedRow = table.getElementsByClassName("selected")[0];
+
+        if (selectedRow) {
+            var serverName = document.getElementById("serverName").value;
+            var serverDetails = document.getElementById("serverDetails").value;
+
+            if (serverName && serverDetails) {
+                selectedRow.cells[0].innerHTML = serverName;
+                selectedRow.cells[1].innerHTML = serverDetails;
+            } else {
+                alert("Please enter both server name and server details.");
+            }
+
+            clearInputs();
+            selectedRow.classList.remove("selected");
+        } else {
+            alert("Please select a row to edit.");
+        }
+    }
+
+    function deleteEntry() {
+        var table = document.getElementById("serverTable");
+        var selectedRow = table.getElementsByClassName("selected")[0];
+
+        if (selectedRow) {
+            table.deleteRow(selectedRow.rowIndex);
+            clearInputs();
+        } else {
+            alert("Please select a row to delete.");
+        }
+    }
+
+    function editRow(button) {
+        var row = button.parentNode.parentNode;
+        var serverName = row.cells[0].innerHTML;
+        var serverDetails = row.cells[1].innerHTML;
+
+        document.getElementById("serverName").value = serverName;
+        document.getElementById("serverDetails").value = serverDetails;
+
+        var table = document.getElementById("serverTable");
+        for (var i = 1; i < table.rows.length; i++) {
+            table.rows[i].classList.remove("selected");
+        }
+
+        row.classList.add("selected");
+    }
+
+    function deleteRow(button) {
+        var row = button.parentNode.parentNode;
+        var table = document.getElementById("serverTable");
+        table.deleteRow(row.rowIndex);
+    }
+
+    function generateCSV() {
+        var csvContent = "data:text/csv;charset=utf-8,Server Name,Server Details\n";
+        var table = document.getElementById("serverTable");
+
+        for (var i = 1; i < table.rows.length; i++) {
+            var row = table.rows[i];
+            var serverName = row.cells[0].innerHTML;
+            var serverDetails = row.cells[1].innerHTML;
+            csvContent += serverName + "," + serverDetails + "\n";
+        }
+
+        var encodedUri = encodeURI(csvContent);
+        var link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "ServerList.csv");
+
+        // Append the link to the body
+        document.body.appendChild(link);
+
+        // Trigger the click event of the link
+        link.click();
+
+        // Remove the link from the body
+        document.body.removeChild(link);
+    }
+
+    function clearInputs() {
+        document.getElementById("serverName").value = "";
+        document.getElementById("serverDetails").value = "";
+    }
+</script>
+<footer style="bottom: 0; left: 0; width: 100%; background-color: #f0f0f0; padding: 10px; text-align: center;">
+    <p>&copy; 2024 Aswindev. All rights reserved.</p>
+</footer>
+
+
+</body>
+</html>
