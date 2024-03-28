@@ -7,57 +7,6 @@
        Credits: This script was influenced by Michael J. Messano's code located here:
                 https://github.com/mubix/PowerShell-1/blob/master/Report-DiskSpaceUsage.ps1
 Special Thanks: SpiceHeads JeffLatham01, Onelinez, and spicehead-6751 for their suggestions and for testing.
-     ChangeLog:    Date     Who  Description of changes
-		----------  ---  ----------------------------------------------------------------------------
-                10/26/2017  RMW  Replaced <b> and </b> with <strong> and </strong>
-                09/06/2018  RMW  Added error checking to see if server is online, skips if not, formatting
-                09/07/2018  RMW  Edited report to include "non responsive" servers
-                10/23/2018  RMW  Removed all specific error handling catch routines to just have one
-                10/31/2018  RMW  Added more code for catching errors
-                11/15/2018  RMW  Server list file changed to .csv to allow descriptions of the servers
-                09/10/2019  RMW  Added an Overview section
-                12/31/2019  RMW  Added CPU Average Load %
-                01/13/2023  RMW  Added CPU color alert for critical average load
-                03/09/2023  RMW  Added OS
-		----------  ---  ----------------------------------------------------------------------------
-
-         Intro: This PowerShell script produces a report that shows drive, RAM, and CPU usage as well as uptime for a list of servers 
-                read from a .csv file. The server list file contains the server name and description, one per line, comma separated, 
-                as shown below:
-                  Server1, Web Server
-                  Server2, File Server
-
-                You can have the report include an "Overview" section that lists any of the items noted above if they are in a warning 
-                or critical state. You determine the values to identify those states. For example, setting the "$DrvWarning" variable to 
-                15 will trigger the report to highlight any drive that is below 15% available space and to be color coded in the color you 
-                designate in $BGColorWarn.
-                You can also disable the "Overview" section entirely if it is of no value to you.
-                Variables that you can adjust for your preferences definitions are described below. 
-----------------------------------------------------------------------------------------------------------------------------------------------
-In the section following this one, edit these variables with your preferences:
-            $DateStamp = Your preferred format for showing the date in the report
-           $ServerList = .CSV file with the list of server names and descriptions for the report; one per line
-       $ReportFileName = Completed report filename
-   $ReportFileOverview = Report filename showing just the Overview
-      $ReportFileStats = Report filename showing just the server devices queried and their results
-          $ReportTitle = Title of the report - shown at the top of the generated HTML file
-           $BGColorTbl = Background color for tables
-          $BGColorGood = Background color for "Good" results - #4CBB17 is a shade of green
-          $BGColorWarn = Background color for "Warning" results - #FFFC33 is a shade of yellow
-          $BGColorCrit = Background color for "Critical" results - #FF0000 is red
-         $UptimeDayMax = Number of days of uptime to be alerted to if exceeded
-              $RAMFree = Percentage of free RAM to be alerted to if less than
-          $CPUCritical = CPU load % to indicate Critical (RED) in report
-           $DrvWarning = Free drive space % to indicate Warning (Yellow) in report - must be more than $DrvCritical amount
-          $DrvCritical = Free drive space % to indicate Critical (RED) in report - must be less than $DrvWarning amount
-$ErrorActionPreference = Set default error action to 'Stop' for error handling
-              $EmailTo = Email recipient
-            $EmailFrom = Email "from" address
-         $EmailSubject = Email subject
-      $EmailAttachment = Email the report as an attachment? Yes or No - will aslo be included in the HTML body
-           $SMTPServer = SMTP server
-       $OverviewOption = Do you want to include the Overvew section on the report? Yes or No
-        $Global:Alerts = Global counter for tracking the total number of alerts
 ======================================================================================================================#>
 $ComputerName = $($env:COMPUTERNAME)
 $ScriptPath = Get-Location
@@ -67,8 +16,8 @@ $Global:Alerts = 0
 # Edit these with your preferences
 #----------------------------------
 $DateStamp = (Get-Date -Format D)
-$ServerList = Import-CSV "$ScriptPath\ServerList.csv" ñHeader Server, Description
-#$ServerList = Import-CSV "$ScriptPath\ServerList-small.csv" ñHeader Server, Description
+$ServerList = Import-CSV "$ScriptPath\ServerList.csv" ‚ÄìHeader Server, Description
+#$ServerList = Import-CSV "$ScriptPath\ServerList-small.csv" ‚ÄìHeader Server, Description
 $DateTimeStamp = Get-Date -Format "yyyyMMdd-HHmmss"
 $ReportFileName = "$ScriptPath\ServerHealthReport_$DateTimeStamp.html"
 $ReportFileOverview = "$ScriptPath\SHR1.html"
@@ -351,9 +300,9 @@ IF ($CPUavg -ge $CPUCritical)
 $MachineName = $ComputerSystem.CSName
 $FreePhysicalMemory = ($ComputerSystem.FreePhysicalMemory) / (1mb)
 $TotalVisibleMemorySize = ($ComputerSystem.TotalVisibleMemorySize) / (1mb)
-$TotalVisibleMemorySizeR = ì{0:N2}î -f $TotalVisibleMemorySize
+$TotalVisibleMemorySizeR = ‚Äú{0:N2}‚Äù -f $TotalVisibleMemorySize
 $TotalFreeMemPerc = ($FreePhysicalMemory/$TotalVisibleMemorySize)*100
-$TotalFreeMemPercR = ì{0:N2}î -f $TotalFreeMemPerc
+$TotalFreeMemPercR = ‚Äú{0:N2}‚Äù -f $TotalFreeMemPerc
 $RAMSpecs = "RAM: $TotalVisibleMemorySizeR GB with $TotalFreeMemPercR% free"
 
 #--------
